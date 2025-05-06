@@ -3,4 +3,5 @@ thin*
 fat*
 FFmpeg.framework
 FFmpeg-*
+ffmpeg-*
 .DS_Store

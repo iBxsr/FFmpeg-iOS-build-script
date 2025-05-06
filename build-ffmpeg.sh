@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # directories
-FF_VERSION="4.3.1"
+FF_VERSION="7.1"
 #FF_VERSION="snapshot-git"
 if [[ $FFMPEG_VERSION != "" ]]; then
   FF_VERSION=$FFMPEG_VERSION
@@ -18,8 +18,25 @@ THIN=`pwd`/"thin"
 
 #FDK_AAC=`pwd`/../fdk-aac-build-script-for-iOS/fdk-aac-ios
 
+#--disable-optimizations \
 CONFIGURE_FLAGS="--enable-cross-compile --disable-debug --disable-programs \
-                 --disable-doc --enable-pic"
+				 --disable-gpl --disable-libx264 --disable-libx265 --enable-version3 \
+				 --disable-avdevice \
+				 --disable-avfilter \
+				 --disable-swresample \
+				 --disable-network \
+				 --disable-devices \
+				 --disable-postproc \
+                 --disable-doc \
+				 --disable-encoder=libvvenc \
+				 --disable-decoder=vvc \
+				 --enable-pic \
+				 --enable-avformat \
+				 --enable-muxer=mp4 \
+				 --enable-muxer=mov \
+				 --enable-muxer=avi \
+				 --enable-demuxer=mov \
+				 --enable-demuxer=avi"
 
 if [ "$X264" ]
 then
@@ -34,12 +51,12 @@ fi
 # avresample
 #CONFIGURE_FLAGS="$CONFIGURE_FLAGS --enable-avresample"
 
-ARCHS="arm64 armv7 x86_64 i386"
+ARCHS="arm64"
 
 COMPILE="y"
 LIPO="y"
 
-DEPLOYMENT_TARGET="8.0"
+DEPLOYMENT_TARGET="15.0"
 
 if [ "$*" ]
 then
@@ -143,7 +160,7 @@ then
 		    --prefix="$THIN/$ARCH" \
 		|| exit 1
 
-		make -j3 install $EXPORT || exit 1
+		make -j16 install $EXPORT || exit 1
 		cd $CWD
 	done
 fi

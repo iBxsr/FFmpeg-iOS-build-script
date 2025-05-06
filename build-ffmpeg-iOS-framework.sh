@@ -2,9 +2,10 @@
 
 # directories
 SCRATCH=`pwd`/"scratch"
-ARCHS="arm64 armv7 i386 x86_64"
+#ARCHS="arm64 armv7 i386 x86_64"
+ARCHS="arm64"
 
-FFMPEG_VERSION="3.4"
+FFMPEG_VERSION="7.1"
 export FFMPEG_VERSION
 HEADER_SUFFIX=".h"
 CURRENT_FOLDER=`pwd`
