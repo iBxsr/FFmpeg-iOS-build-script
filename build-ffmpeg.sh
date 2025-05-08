@@ -19,24 +19,22 @@ THIN=`pwd`/"thin"
 #FDK_AAC=`pwd`/../fdk-aac-build-script-for-iOS/fdk-aac-ios
 
 #--disable-optimizations \
+# --enable-muxer=mp4,mov,avi \
+# --enable-demuxer=mp4,mov,avi \
 CONFIGURE_FLAGS="--enable-cross-compile --disable-debug --disable-programs \
-				 --disable-gpl --disable-libx264 --disable-libx265 --enable-version3 \
+				 --disable-gpl --disable-libx264 --disable-libx265 \
+				 --enable-version3 \
 				 --disable-avdevice \
-				 --disable-avfilter \
-				 --disable-swresample \
-				 --disable-network \
 				 --disable-devices \
-				 --disable-postproc \
+				 --disable-avfilter \
                  --disable-doc \
 				 --disable-encoder=libvvenc \
 				 --disable-decoder=vvc \
-				 --enable-pic \
+				 --enable-avcodec \
+				 --enable-swscale \
 				 --enable-avformat \
-				 --enable-muxer=mp4 \
-				 --enable-muxer=mov \
-				 --enable-muxer=avi \
-				 --enable-demuxer=mov \
-				 --enable-demuxer=avi"
+				 --disable-audiotoolbox \
+				 --enable-pic"
 
 if [ "$X264" ]
 then
@@ -118,7 +116,8 @@ then
 		    CFLAGS="$CFLAGS -mios-simulator-version-min=$DEPLOYMENT_TARGET"
 		else
 		    PLATFORM="iPhoneOS"
-		    CFLAGS="$CFLAGS -mios-version-min=$DEPLOYMENT_TARGET -fembed-bitcode"
+			#-fembed-bitcode
+		    CFLAGS="$CFLAGS -mios-version-min=$DEPLOYMENT_TARGET"  
 		    if [ "$ARCH" = "arm64" ]
 		    then
 		        EXPORT="GASPP_FIX_XCODE5=1"
@@ -126,7 +125,8 @@ then
 		fi
 
 		XCRUN_SDK=`echo $PLATFORM | tr '[:upper:]' '[:lower:]'`
-		CC="xcrun -sdk $XCRUN_SDK clang"
+		CC="xcrun --sdk $XCRUN_SDK clang -arch $ARCH"
+		CXX="xcrun --sdk $XCRUN_SDK clang++ -arch $ARCH"
 
 		# force "configure" to use "gas-preprocessor.pl" (FFmpeg 3.3)
 		if [ "$ARCH" = "arm64" ]
@@ -135,6 +135,8 @@ then
 		else
 		    AS="gas-preprocessor.pl -- $CC"
 		fi
+
+		echo "CC: $CC \nAS:$AS"
 
 		CXXFLAGS="$CFLAGS"
 		LDFLAGS="$CFLAGS"
@@ -151,8 +153,10 @@ then
 
 		TMPDIR=${TMPDIR/%\/} $CWD/$SOURCE/configure \
 		    --target-os=darwin \
+			--sysroot="$(xcrun --sdk $XCRUN_SDK --show-sdk-path)" \
 		    --arch=$ARCH \
 		    --cc="$CC" \
+			--cxx="$CXX" \
 		    --as="$AS" \
 		    $CONFIGURE_FLAGS \
 		    --extra-cflags="$CFLAGS" \
